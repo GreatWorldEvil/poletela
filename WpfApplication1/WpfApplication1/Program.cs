@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 
 class letychaya_fignya {
@@ -15,13 +17,11 @@ class letychaya_fignya {
 
     public delegate void MyEventHandler(object sender, EventArgs e);
 
-    //public event peredai_drygomy Collision;
-
     public event MyEventHandler Collision;
 
     public void poletela() {
         
-        double height = 15, distance = 100;
+        //double height = 15, distance = 100;
         
         Console.WriteLine("Введите ускорение, угол фигни: ");
         start_v = Convert.ToDouble(Console.ReadLine());
@@ -81,42 +81,26 @@ public
 
 }*/
 
-class Program
+public class Program : Window
 {
-    [STAThread] // Program will use single-threaded model to run
+    [STAThread]
     public static void Main()
     {
-        
-        // Also the previous code can be simplified into:
-        Window win = new Window(); // Инициализация нового обхекта Окно
-        win.Title = "Poletaem?"; // заголовок для окна
-        win.MouseDown += WindowOnMouseDown;   
-
-        win.Show(); // Display that white box to user on desktop
-
         Application app = new Application();
-
-        app.Run(); //запускает цикл сообщений
-        
+        app.Run(new Program());
     }
-
-    static void WindowOnMouseDown(object sender, MouseButtonEventArgs args)
+    public Program()
+    {
+        Title = "Нажатие кнопки"; //название окна
+        Button qestion = new Button(); //этим классом представлена кнопка со свойством Content и событием Click
+        qestion.Content = "Нажми меня!";  //свойству Content объекта Button задается текстовая строка
+        qestion.Click += ButtonOnClick;
+        Content = qestion; //сам объект Button задаётся свойству Content объекта Window
+    }
+    void ButtonOnClick(object sender, RoutedEventArgs args)
     {
         letychaya_fignya fruit = new letychaya_fignya();
 
-        fruit.poletela();  
-    } 
-}
-
-
-
-/*public class Program{
-    
-    public static void Main(){
-        
-        letychaya_fignya fruit = new letychaya_fignya();
-        
         fruit.poletela();
-        
     }
-} */
+}
