@@ -19,9 +19,9 @@ class letychaya_fignya {
 
     public event MyEventHandler Collision;
 
+    public event MyEventHandler Earth;
+
     public void poletela() {
-        
-        //double height = 15, distance = 100;
         
         Console.WriteLine("Введите ускорение, угол фигни: ");
         start_v = Convert.ToDouble(Console.ReadLine());
@@ -39,26 +39,26 @@ class letychaya_fignya {
 
             double a = alfa* (Math.PI /180); // теперь в радианах 
             
-            x = start_v * Math.Cos(a) * t + 9.8 * t * t / 2;
-            y =  start_v * Math.Sin(a) * t; 
-            if (y < 0)
-                break;
-            if (y < h && x > stena_x && x < (stena_x + w))
-                Collision += Ops_Collision;
-            
-            /*Console.WriteLine($" X : {x}; Y : {y} ");
+            x = 5 + start_v * Math.Cos(a) * t + 9.8 * t * t / 2;
+            y = 5 + start_v * Math.Sin(a) * t;
+
+            Console.WriteLine("X : {0}  Y : {1} ", x, y);
             alfa -= t;
-            */
+            
+            if (y <= 0)
+            {
+                Earth(this, new EventArgs() );
+                return;
+            }
+            if (y <= h && x > stena_x && x < (stena_x + w))
+            {
+                Collision(this, new EventArgs());
+                return;
+            }
         }
    }
    
-   public void Ops_Collision(object sender, EventArgs e) 
-        {
-            Window win = new Window();
-            win.Title = "Ooooooops! Collision!";
-            win.ShowDialog(); 
-        }
-  
+   
     
 }
 
@@ -93,14 +93,28 @@ public class Program : Window
     {
         Title = "Нажатие кнопки"; //название окна
         Button qestion = new Button(); //этим классом представлена кнопка со свойством Content и событием Click
-        qestion.Content = "Нажми меня!";  //свойству Content объекта Button задается текстовая строка
+        qestion.Content = "Запуск?";  //свойству Content объекта Button задается текстовая строка
         qestion.Click += ButtonOnClick;
         Content = qestion; //сам объект Button задаётся свойству Content объекта Window
     }
+
+    public void Ops_Collision(object sender, EventArgs e)
+    {
+        Console.WriteLine("Ooooooops! Collision!");
+        MessageBox.Show("Ooooooops! Collision!");
+    }
+
+    public void Ops_Earth(object sender, EventArgs e)
+    {
+        Console.WriteLine("There in no collision!");
+        MessageBox.Show("There in no collision!");
+    }
+
     void ButtonOnClick(object sender, RoutedEventArgs args)
     {
         letychaya_fignya fruit = new letychaya_fignya();
-
+        fruit.Earth += Ops_Earth;
+        fruit.Collision += Ops_Collision;
         fruit.poletela();
     }
 }
