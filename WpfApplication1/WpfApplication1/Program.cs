@@ -8,12 +8,31 @@ using System.Windows.Controls;
 using System.Windows.Media;
 
 
+struct Pair
+{
+    public double x;
+    public double y;
+
+    public Pair(double x0, double y0)
+    {
+        x = x0;
+        y = y0;
+    }
+    public void print()
+    {
+        Console.WriteLine(x + " " + y);
+    }
+}
+
 class letychaya_fignya {
         
     public double start_v; //начальное ускорение
     public double alfa; //угол полёта. в градусах
     
     private double x,y;
+
+    public Pair [] coordinates = new Pair[200]; //для canvas
+    public double stena_x, h, w;
 
     public delegate void MyEventHandler(object sender, EventArgs e);
 
@@ -23,11 +42,6 @@ class letychaya_fignya {
 
     public void poletela(double start_v, double alfa) {
         
-        /*Console.WriteLine("Введите ускорение, угол фигни: ");
-        start_v = Convert.ToDouble(Console.ReadLine());
-        alfa  = Convert.ToDouble(Console.ReadLine());*/
-        
-        double stena_x, h, w;
 
         Random rnd = new Random();
         stena_x = rnd.Next(0,100);
@@ -41,6 +55,8 @@ class letychaya_fignya {
             
             x = 5 + start_v * Math.Cos(a) * t + 9.8 * t * t / 2;//вычисляем координаты х, у
             y = 5 + start_v * Math.Sin(a) * t;
+
+            coordinates[Convert.ToInt16(t * 10)] = new Pair(x, y);
 
             //Console.WriteLine("X : {0}  Y : {1} ", x, y); кусок кода для проверки, не убирать
             alfa -= t;
@@ -65,6 +81,10 @@ class letychaya_fignya {
 public class Program : Window
 {
     Grid grid;
+    TextBox velocity;
+    TextBox corner;
+    Canvas picture;
+    letychaya_fignya fruit;
 
     [STAThread]
 
@@ -82,8 +102,7 @@ public class Program : Window
         grid = new Grid(); //создаём грид
         //grid.HorizontalAlignment = HorizontalAlignment.Left;
         //grid.VerticalAlignment = VerticalAlignment.Top;
-        grid.Width = 400;
-        grid.Height = 250;
+        
         grid.ShowGridLines = true;
 
         //создаём столбцы
@@ -105,7 +124,7 @@ public class Program : Window
         grid.RowDefinitions.Add(rowDef3);
 
         //создаём, добавляем канвас с анимацией
-        Canvas picture = new Canvas();
+        picture = new Canvas();
         Grid.SetRow(picture, 0);
         Grid.SetColumn(picture, 1);
 
@@ -119,11 +138,39 @@ public class Program : Window
         grid.Children.Add(picture);
         grid.Children.Add(qestion);
 
+        //создаём текстовое окно для ввода данных
+        TextBlock message = new TextBlock();
+        message.Text = "Введите начальную скорость и угол: ";
+        Grid.SetRow(message, 0);
+        Grid.SetColumn(message, 0);
+
+        velocity = new TextBox();
+        velocity.Text = "0";
+        Grid.SetRow(velocity, 1);
+        Grid.SetColumn(velocity, 0);
+
+        corner = new TextBox();
+        corner.Text = "0";
+        Grid.SetRow(corner, 2);
+        Grid.SetColumn(corner, 0);
+
+        grid.Children.Add(velocity);
+        grid.Children.Add(corner);
+        grid.Children.Add(message);
+
         Content = grid;// делаем грид содержимым окна
     }
 
     public void Ops_Collision(object sender, EventArgs e)//обработчик события "столкновение с препятствием"
     {
+        Canvas fignya = new Canvas();
+        fignya.Height = 100;
+        fignya.Width = 100;
+
+        Canvas stena = new Canvas();
+        stena.Height = fruit.h;
+        stena.Width = fruit.w;
+
         Console.WriteLine("Ooooooops! Collision!");
         MessageBox.Show("Ooooooops! Collision!");
     }
@@ -136,29 +183,11 @@ public class Program : Window
 
     void ButtonOnClick(object sender, RoutedEventArgs args) //обработчик события нажатие на кнопку, создаёт объект класса "фигня"
     {
-        //создаём текстовое окно для ввода данных
-        TextBlock message = new TextBlock();
-        message.Text = "Введите начальную скорость и угол: ";
-        Grid.SetRow(message, 0);
-        Grid.SetColumn(message, 0);
-
-        TextBox velocity = new TextBox();
-        velocity.Text = "0";
-        Grid.SetRow(velocity, 1);
-        Grid.SetColumn(velocity, 0);
-
-        TextBox corner = new TextBox();
-        corner.Text = "0";
-        Grid.SetRow(corner, 2);
-        Grid.SetColumn(corner, 0);
-
-        grid.Children.Add(velocity);
-        grid.Children.Add(corner);
-        grid.Children.Add(message);
+        
 
         double start_v = Convert.ToDouble(velocity.Text);
         double alfa = Convert.ToDouble(corner.Text);
-        letychaya_fignya fruit = new letychaya_fignya();
+        fruit = new letychaya_fignya();
         fruit.Earth += Ops_Earth;//назначаем обработчики события
         fruit.Collision += Ops_Collision;
         fruit.poletela(start_v,alfa);//запуск!
